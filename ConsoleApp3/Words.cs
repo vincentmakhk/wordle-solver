@@ -8,9 +8,9 @@ public class Words
 
     public Words()
     {
-        AllValidWords = File.ReadAllLines("d:\\download\\wordle-full-list.txt")
+        AllValidWords = File.ReadAllLines("./text/wordle-full-list.txt")
             .ToList().Select(x => x.ToLower()).ToArray();
-        AllAnswers = File.ReadAllLines("d:\\download\\wordle-answers.txt")
+        AllAnswers = File.ReadAllLines("./text/wordle-answers.txt")
             .ToList().Select(x => x.ToLower()).ToArray();
     }
 
@@ -35,13 +35,13 @@ public class Words
         return words;
     }
 
-    public int CountValidAnswers(List<Entry> entries, string[] answers, int minCount)
+    public int CountValidAnswers(Entry entry, string[] answers, int minCount)
     {
         int count = 0;
         var judge = new Judge();
         foreach (var word in answers)
         {
-            if (judge.FulfillAsAnswer(entries, word))
+            if (judge.FulfillAsAnswer(entry, word))
             {
                 ++count;
             }
@@ -66,8 +66,18 @@ public class Words
         return words;
     }
 
-    public string PickBest(HashSet<string> equals)
+    public string PickBest(HashSet<string> equals, string[] validAnswers)
     {
+        if (equals.Count == 1)
+        {
+            return equals.First();
+        }
+
+        if (validAnswers.Length == 1)
+        {
+            return validAnswers[0];
+        }
+
         string w = "";
         int score = int.MinValue;
         foreach (var word in equals)
