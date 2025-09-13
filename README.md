@@ -23,9 +23,11 @@ It would be interesting to know:
 
 ## Results
 
-For 1, I haven't an answer
-For 2, according to algorithm I've written, there is one single word that stands out
-For 3, there are at least 6500 words that cannot be x. Based on patterns like _OVER, _IGHT which has 7 or more answers
+For 1, I haven't had an answer
+
+For 2, according to algorithm I've used, there is one single word that stands out
+
+For 3, there are around 6500 words that cannot be x. Just based on patterns like _OVER, _IGHT which has 7 or more answers. There may be more.
 
 ## Authors
 
@@ -33,9 +35,9 @@ Vincent Mak
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 License - see the LICENSE.txt file for details
+MIT License
 
-## Acknowledgments
+## Acknowledgements
 
 Thanks to the game inventor.
 Thanks to the one who has introduced me to the game.
