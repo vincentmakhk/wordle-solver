@@ -1,0 +1,244 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp3;
+
+public class Judge
+{
+    public State[] Check(string answer, string guess)
+    {
+        var states = new State[5];
+        var answerUsed = new bool[5];
+        var guessUsed = new bool[5];
+
+        for (int i=0; i<5; ++i)
+        {
+            if (answer[i] == guess[i])
+            {
+                answerUsed[i] = true;
+                guessUsed[i] = true;
+                states[i] = State.Green;
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            for (int j = 0; j < 5 && !answerUsed[i]; ++j)
+            {
+                if (guessUsed[j])
+                    continue;
+
+                if (answer[i] != guess[j])
+                    continue;
+
+                answerUsed[i] = true;
+                guessUsed[j] = true;
+                states[j] = State.Yellow;
+            }
+        }
+
+        return states;
+    }
+
+    public bool Fulfill(List<Entry> entries, string word)
+    {
+        foreach (var entry in entries)
+        {
+            if (entry.Guess == word)
+            {
+                if (HasWon(entry))
+                    throw new InvalidOperationException();
+
+                return false;
+            }
+
+            if (!Fulfill(entry, word))
+            {
+                return false;
+            }
+
+            //var state = Check(word, entry.Guess);
+            //for (int i = 0; i < 5; ++i)
+            //{
+            //    if (state[i] != entry.States[i])
+            //        throw new InvalidOperationException();
+            //}
+        }
+        return true;
+    }
+
+    public bool Fulfill(Entry entry, string word)
+    {
+        var match = new bool[5];
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Green)
+            {
+                if (entry.Guess[i] == word[i])
+                {
+                    match[i] = true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Yellow)
+            {
+                bool found = false;
+                for (int j = 0; j < 5; ++j)
+                {
+                    if (entry.Guess[i] == word[j] && !match[j])
+                    {
+                        match[j] = true;
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Gray)
+            {
+                for (int j = 0; j < 5; ++j)
+                {
+                    if (entry.Guess[i] == word[j] && !match[j])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public Entry MakeGuess(string guess, string answer)
+    {
+        return new Entry(
+            guess,
+            Check(answer, guess)
+        );
+    }
+
+    public bool HasWon(Entry entry)
+    {
+        return entry.States.All(x => x == State.Green);
+    }
+
+    public bool EqualState(State[] states, State[] res)
+    {
+        for (int i=0; i<5; ++i)
+        {
+            if (states[i] != res[i])
+                return false;
+        }
+        return true;
+    }
+
+    internal bool FulfillAsAnswer(List<Entry> entries, string word)
+    {
+        foreach (var entry in entries)
+        {
+            if (entry.Guess == word)
+            {
+                if (!HasWon(entry))
+                    return false;
+            }
+
+            if (!FulfillAsAnswer(entry, word))
+            {
+                return false;
+            }
+
+            //var state = Check(word, entry.Guess);
+            //for (int i = 0; i < 5; ++i)
+            //{
+            //    if (state[i] != entry.States[i])
+            //        throw new InvalidOperationException();
+            //}
+        }
+        return true;
+    }
+
+    public bool FulfillAsAnswer(Entry entry, string word)
+    {
+        var match = new bool[5];
+
+        for (int i = 0; i < 5; ++i)
+        {
+            //if (entry.States[i] == State.Gray && word.Contains(entry.Guess[i]))
+            //{
+            //    return false;
+            //}
+
+            if (entry.States[i] == State.Yellow && word[i] == entry.Guess[i])
+            {
+                return false;
+            }
+
+            if (entry.States[i] == State.Green)
+            {
+                if (entry.Guess[i] == word[i])
+                {
+                    match[i] = true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Yellow)
+            {
+                bool found = false;
+                for (int j = 0; j < 5; ++j)
+                {
+                    if (entry.Guess[i] == word[j] && !match[j])
+                    {
+                        if (i == j)
+                            throw new InvalidOperationException();
+
+                        match[j] = true;
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Gray)
+            {
+                for (int j = 0; j < 5; ++j)
+                {
+                    if (entry.Guess[i] == word[j] && !match[j])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+}
