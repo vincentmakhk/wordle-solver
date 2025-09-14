@@ -11,8 +11,8 @@ Console.WriteLine("Hello, World!");
 var judge = new Judge();
 var words = new Words();
 //var answer = words.RandomizeAnswer();
-var answer = "tight";
-var firstGuess = "crypt";
+var answer = "noisy";
+var firstGuess = "frame";
 
 var analysis = new Analysis(judge, words);
 analysis.Play(firstGuess, answer);
@@ -23,8 +23,9 @@ analysis.FindBestFirstWord();
 
 // Identity words cannot be first
 analysis.FindNotFirstWords();
-*/
+
 // Max guess for a first word
-//analysis.WorstGames("crypt");
+analysis.WorstGames("frame");
+*/
 
 return 0;

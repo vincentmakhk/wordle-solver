@@ -14,7 +14,7 @@ public class JudgeTests
 {
     [TestMethod]
     [DataRow("aaaaa", "ababa", State.Green, State.Gray, State.Green, State.Gray, State.Green)]
-    [DataRow("abcde", "bbcce", State.Gray, State.Green, State.Green, State.Gray, State.Green)]
+    [DataRow("abcde", "bccbe", State.Yellow, State.Gray, State.Green, State.Gray, State.Green)]
     [DataRow("ababc", "cbaba", State.Yellow, State.Green, State.Green, State.Green, State.Yellow)]
     [DataRow("abcda", "eaaba", State.Gray, State.Yellow, State.Gray, State.Yellow, State.Green)]
     [DataRow("abcda", "eadbc", State.Gray, State.Yellow, State.Yellow, State.Yellow, State.Yellow)]
@@ -27,6 +27,8 @@ public class JudgeTests
     }
 
     [TestMethod]
+    [DataRow("aapas", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("aahed", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, false)]
     [DataRow("after", "aapas", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("aater", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("afaer", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]

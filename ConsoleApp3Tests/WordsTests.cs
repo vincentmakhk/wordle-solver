@@ -23,10 +23,18 @@ namespace ConsoleApp3.Tests
             int count = 0;
             foreach (var w in words.AllValidWords)
             {
-                if (w.StartsWith("a"))
+                if (w.StartsWith("a") &&
+                    !w.Contains('u') &&
+                    !w.Contains('d') &&
+                    !w.Contains('i') &&
+                    !w.Contains('t'))
                 {
-                    CollectionAssert.Contains(validWords, w);
+                    CollectionAssert.Contains(validWords, w, $"Should contain {w}");
                     count++;
+                }
+                else
+                {
+                    CollectionAssert.DoesNotContain(validWords, w, $"Should not contain {w}");
                 }
             }
             Assert.AreEqual(count, validWords.Count);
@@ -69,6 +77,7 @@ namespace ConsoleApp3.Tests
             foreach (var w in words.AllAnswers)
             {
                 if (w.StartsWith("a") &&
+                    !w.Skip(1).Contains('a') &&
                     !w.Contains('p') &&
                     !w.Contains('s') &&
                     !w.Contains('u') &&
@@ -78,6 +87,10 @@ namespace ConsoleApp3.Tests
                 {
                     CollectionAssert.Contains(validAnswers, w);
                     count++;
+                }
+                else
+                {
+                    CollectionAssert.DoesNotContain(validAnswers, w);
                 }
             }
             Assert.AreEqual(count, validAnswers.Count);
