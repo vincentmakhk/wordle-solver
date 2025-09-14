@@ -5,3 +5,4 @@ public record Entry
     string Guess,
     State[] States
 );
+

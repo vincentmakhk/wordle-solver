@@ -19,7 +19,7 @@ namespace ConsoleApp3.Tests
             var judge = new Judge();
             var entry = judge.MakeGuess("audit", "apple");
             var entries = new List<Entry> { entry };
-            var validWords = words.GetValidWords(entries);
+            var validWords = words.GetValidWords(entries, true);
             int count = 0;
             foreach (var w in words.AllValidWords)
             {
@@ -103,7 +103,7 @@ namespace ConsoleApp3.Tests
             var judge = new Judge();
             var entry = judge.MakeGuess("trunk", "shirt");
             var entries = new List<Entry> { entry };
-            var validWords = words.GetValidWords(entries);
+            var validWords = words.GetValidWords(entries, true);
             int count = 0;
             foreach (var w in words.AllValidWords)
             {

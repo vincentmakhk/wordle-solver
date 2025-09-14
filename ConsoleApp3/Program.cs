@@ -11,21 +11,20 @@ Console.WriteLine("Hello, World!");
 var judge = new Judge();
 var words = new Words();
 //var answer = words.RandomizeAnswer();
-var answer = "noisy";
-var firstGuess = "frame";
+var answer = "plaza";
+var firstGuess = "crypt";
 
 var analysis = new Analysis(judge, words);
-analysis.Play(firstGuess, answer);
+//analysis.Play(firstGuess, answer);
 
-/*
+
 // Find best first word
-analysis.FindBestFirstWord();
+//analysis.FindBestFirstWord();
 
 // Identity words cannot be first
-analysis.FindNotFirstWords();
+//analysis.FindNotFirstWords();
 
 // Max guess for a first word
-analysis.WorstGames("frame");
-*/
+var result = analysis.WorstGames("olate");
 
 return 0;

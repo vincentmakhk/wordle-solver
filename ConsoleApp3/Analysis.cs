@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Drawing;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ConsoleApp3;
 
@@ -8,11 +10,14 @@ public class Analysis
     public const string CANNOT_FILE_PATH = "./text/cannot.txt";
     private readonly Judge _judge;
     private readonly Words _words;
+    private readonly NextWordFinder _nextWordFinder;
+    private Dictionary<string, string> _cacheBestWord = new();
 
     public Analysis(Judge judge, Words words)
     {
         _judge = judge;
         _words = words;
+        _nextWordFinder = new NextWordFinder(words, judge);
     }
 
     public void FindBestFirstWord()
@@ -52,7 +57,7 @@ public class Analysis
                 continue;
             }
 
-            int maxCount = FindMaxCount(_first, _words.AllAnswers, minCount);
+            int maxCount = _nextWordFinder.FindMaxCount(_first, _words.AllAnswers, minCount);
 
             Console.WriteLine($"{_first} {maxCount} {minCount}");
 
@@ -84,36 +89,67 @@ public class Analysis
     {
         var groups = new Dictionary<string, List<string>>();
 
-        for (int pattern = 0; pattern < 5; pattern++)
+        for (int pattern = 1; pattern < 32; pattern++)
         {
-            var states = new State[5];
-            for (int i = 0; i < 5; ++i)
-                states[i] = (i == pattern) ? State.Gray : State.Green;
-
-            foreach (var word in _words.AllAnswers)
+            var states = new State[5]
             {
-                var prefix = word.Remove(pattern, 1);
-                prefix = prefix.Insert(pattern, "_");
-                if (groups.ContainsKey(prefix))
-                    continue;
+                (pattern & 1)==0? State.Gray : State.Green,
+                (pattern & 2)==0? State.Gray : State.Green,
+                (pattern & 4)==0? State.Gray : State.Green,
+                (pattern & 8)==0? State.Gray : State.Green,
+                (pattern & 16)==0? State.Gray : State.Green
+            };
 
-                var collection = new List<string>();
-                collection.Add(word);
+            var c = states.Count(x => x == State.Green);
+            if (c <= 2)
+                continue;
 
-                foreach (var anotherWord in _words.AllAnswers)
-                {
-                    var res = _judge.Check(word, anotherWord);
-                    if (_judge.EqualState(states, res))
-                    {
-                        collection.Add(anotherWord);
-                    }
-                }
-
-                groups.Add(prefix, collection);
-            }
+            var g = _nextWordFinder.WordGrouper(_words.AllAnswers, states);
+            foreach (var pair in g)
+                groups.Add(pair.Key, pair.Value);
         }
 
         return groups;
+    }
+
+    public int FindMaxDistinct(string pattern, List<string> values)
+    {
+        var strip = values.Select(x => WordUtil.Strip(pattern, x)).ToList();
+
+        int max = 1;
+        var queue = new Queue<(List<string>, string, int)>();
+        for (int i = 0; i < strip.Count; ++i)
+        {
+            var words = new List<string> { strip[i] };
+            queue.Enqueue((words, strip[i], i));
+        }
+
+        while (queue.Any())
+        {
+            var first = queue.Dequeue();
+            for (int i = first.Item3 + 1; i < strip.Count; ++i)
+            {
+                if (!first.Item2.Intersect(strip[i]).Any())
+                {
+                    var l = new List<string>(first.Item1)
+                    {
+                        strip[i]
+                    };
+
+                    var s = string.Concat(first.Item2.Union(strip[i]));
+
+                    var count = l.Count;
+                    if (count > max)
+                    {
+                        max = count;
+                    }
+
+                    queue.Enqueue((l, s, i));
+                }
+            }
+        }
+
+        return max;
     }
 
     public void FindNotFirstWords()
@@ -129,7 +165,9 @@ public class Analysis
 
         foreach (var group in groups)
         {
-            if (group.Value.Count > 6)
+            var maxDistinct = FindMaxDistinct(group.Key, group.Value);
+
+            if (maxDistinct > 6)
             {
                 foreach (var w in group.Value)
                 {
@@ -137,7 +175,7 @@ public class Analysis
                 }
             }
 
-            if (group.Value.Count >= 6)
+            if (maxDistinct >= 6)
             {
                 var allLetters = group.Value.SelectMany(x => x.ToCharArray());
 
@@ -158,70 +196,34 @@ public class Analysis
             File.WriteAllLines(CANNOT_FILE_PATH, cannot.ToArray());
     }
 
-    private int FindMaxCount(string nextGuess, string[] validAnswers, int minCount)
+    private string FindNextGuess(List<Entry> entries)
     {
-        int maxCount = 0;
+        var cacheKey = string.Join(',', entries.Select(e => $"{e.Guess} {e.States[0]} {e.States[1]} {e.States[2]} {e.States[3]} {e.States[4]}"));
+        if (_cacheBestWord.TryGetValue(cacheKey, out var cachedValue))
+            return cachedValue;
 
-        // if nextGuess, assume answer, given results
-        foreach (var possibleAnswer in validAnswers)
-        {
-            var nextEntry = _judge.MakeGuess(nextGuess, possibleAnswer);
-            var nextCount = _words.CountValidAnswers(nextEntry, validAnswers, minCount);
-            if (nextCount == 0)
-            {
-                continue;
-            }
-            if (nextCount > maxCount)
-            {
-                maxCount = nextCount;
-            }
-        }
+        var validAnswers = _words.GetValidAnswers(entries, _words.AllAnswers).ToArray();
 
-        return maxCount;
+        var decidedGuess = _nextWordFinder.Find(entries, validAnswers);
+        //var decidedGuess = validAnswers.Length > 200 ?
+        //    _nextWordFinder.Find(entries, validAnswers) :
+        //    _nextWordFinder.ExhaustiveSearch(entries, validAnswers);
+
+        _cacheBestWord[cacheKey] = decidedGuess;
+        return decidedGuess;
     }
 
     public int Play(string firstGuess, string answer)
     {
         var entry = _judge.MakeGuess(firstGuess, answer);
         var entries = new List<Entry>();
-        Console.WriteLine($"Guess 1: {firstGuess}");
+        Console.WriteLine($"Guess 1: {firstGuess} on {answer}");
         int numberOfGuesses = 1;
 
         while (!_judge.HasWon(entry))
         {
             entries.Add(entry);
-            var validGuess = _words.GetValidWords(entries);
-            var validAnswers = _words.GetValidAnswers(entries, _words.AllAnswers).ToArray();
-            Console.WriteLine($"Remains {validGuess.Count} guesses {validAnswers.Length} answers");
-            int minCount = int.MaxValue;
-            HashSet<string> equals = new HashSet<string>();
-            foreach (var nextGuess in validGuess)
-            {
-                int maxCount = FindMaxCount(nextGuess, validAnswers, minCount);
-
-                if (maxCount == 0)
-                {
-                    continue;
-                }
-
-                if (maxCount < minCount)
-                {
-                    minCount = maxCount;
-                    equals.Clear();
-                    equals.Add(nextGuess);
-                }
-                else if (maxCount == minCount)
-                {
-                    equals.Add(nextGuess);
-                }
-            }
-
-            if (validAnswers.Length == 1)
-            {
-                if (!equals.Contains(validAnswers[0]))
-                    throw new InvalidOperationException("Impossible not to have only answer");
-            }
-            var decidedGuess = _words.PickBest(equals, validAnswers);
+            var decidedGuess = FindNextGuess(entries);
             Console.WriteLine($"Guess {numberOfGuesses+1}: {decidedGuess}");
             entry = _judge.MakeGuess(decidedGuess, answer);
             ++numberOfGuesses;
@@ -232,8 +234,10 @@ public class Analysis
 
     public int WorstGames(string firstGuess)
     {
-        var worstWords = FindPatterns().Where(g => g.Value.Count >= 6).SelectMany(x => x.Value).ToArray();
-
+        var worstWords = FindPatterns()
+            .Where(p => p.Value.Where(v => _words.AllAnswers.Contains(v)).Count() >= 5)
+            .SelectMany(p => p.Value)
+            .ToList();
         int max = 0;
         HashSet<string> equals = new();
         foreach (var word in worstWords)

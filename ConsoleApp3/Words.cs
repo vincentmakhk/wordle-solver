@@ -21,13 +21,13 @@ public class Words
         return AllAnswers[index];
     }
 
-    public List<string> GetValidWords(List<Entry> entries)
+    public List<string> GetValidWords(List<Entry> entries, bool grayCheck)
     {
         var words = new List<string>();
         var judge = new Judge();
         foreach (var word in AllValidWords)
         {
-            if (judge.Fulfill(entries, word))
+            if (judge.Fulfill(entries, word, grayCheck))
             {
                 words.Add(word);
             }
@@ -45,7 +45,7 @@ public class Words
             {
                 ++count;
             }
-            
+
             if (count > minCount)
                 return count;
         }
@@ -64,58 +64,6 @@ public class Words
             }
         }
         return words;
-    }
-
-    public string PickBest(HashSet<string> equals, string[] validAnswers)
-    {
-        if (equals.Count == 1)
-        {
-            return equals.First();
-        }
-
-        if (validAnswers.Length == 1)
-        {
-            return validAnswers[0];
-        }
-
-        string w = "";
-        int score = int.MinValue;
-        foreach (var word in equals)
-        {
-            int s = Score(word);
-            if (s > score)
-            {
-                score = s;
-                w = word;
-            }
-        }
-        return w;
-    }
-
-    public int Score(string word)
-    {
-        int duplicate = -word.GroupBy(c => c).Select(g => g.Count() - 1).Sum();
-        int vowels = 0;
-        if (word.Contains('a'))
-            ++vowels;
-        if (word.Contains('e'))
-            ++vowels;
-        if (word.Contains('i'))
-            ++vowels;
-        if (word.Contains('o'))
-            ++vowels;
-        if (word.Contains('u'))
-            ++vowels;
-
-        int no_vowels = 0;
-        if (!word.Contains('a') &&
-            !word.Contains('e') &&
-            !word.Contains('i') &&
-            !word.Contains('o') &&
-            !word.Contains('u'))
-            no_vowels = 3;
-
-        return duplicate * 2 + vowels + no_vowels;
     }
 
 }

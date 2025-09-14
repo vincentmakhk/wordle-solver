@@ -28,6 +28,27 @@ public class JudgeTests
 
     [TestMethod]
     [DataRow("aapas", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("aahed", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("after", "aapas", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("aater", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("afaer", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]
+    [DataRow("aaaaa", "ababa", State.Green, State.Gray, State.Green, State.Gray, State.Green, true)]
+    [DataRow("ababa", "ababa", State.Green, State.Gray, State.Green, State.Gray, State.Green, true)]
+    [DataRow("abbba", "ababa", State.Green, State.Gray, State.Green, State.Gray, State.Green, false)]
+    [DataRow("bbcce", "bbcce", State.Yellow, State.Green, State.Green, State.Gray, State.Gray, true)]
+    [DataRow("abcde", "bcdea", State.Yellow, State.Yellow, State.Yellow, State.Yellow, State.Yellow, true)]
+    [DataRow("accde", "bcdea", State.Yellow, State.Yellow, State.Yellow, State.Yellow, State.Yellow, false)]
+    [DataRow("aecde", "bcdea", State.Yellow, State.Yellow, State.Yellow, State.Yellow, State.Yellow, false)]
+    public void RelaxedFulfillTest(string word, string guess, State s1, State s2, State s3, State s4, State s5, bool valid)
+    {
+        var entry = new Entry(guess, new State[] { s1, s2, s3, s4, s5 });
+        var judge = new Judge();
+        var actual = judge.Fulfill(entry, word, false, false);
+        Assert.AreEqual(valid, actual);
+    }
+
+    [TestMethod]
+    [DataRow("aapas", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("aahed", "audit", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, false)]
     [DataRow("after", "aapas", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("aater", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]
@@ -48,6 +69,7 @@ public class JudgeTests
     }
 
     [TestMethod]
+    [DataRow("plaza", "aapas", State.Yellow, State.Yellow, State.Yellow, State.Gray, State.Gray, true)]
     [DataRow("after", "aapas", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("aater", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, false)]
     [DataRow("afaer", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true)]

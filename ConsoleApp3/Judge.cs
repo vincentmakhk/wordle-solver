@@ -37,7 +37,7 @@ public class Judge
         return states;
     }
 
-    public bool Fulfill(List<Entry> entries, string word)
+    public bool Fulfill(List<Entry> entries, string word, bool grayCheck)
     {
         foreach (var entry in entries)
         {
@@ -49,7 +49,7 @@ public class Judge
                 return false;
             }
 
-            if (!Fulfill(entry, word))
+            if (!Fulfill(entry, word, false, grayCheck))
             {
                 return false;
             }
@@ -64,11 +64,19 @@ public class Judge
         return true;
     }
 
-    public bool Fulfill(Entry entry, string word)
+    public bool Fulfill(Entry entry, string word, bool asAnswer = false, bool grayCheck = true)
     {
         var match = new bool[5];
         for (int i = 0; i < 5; ++i)
         {
+            if (asAnswer)
+            {
+                if (entry.States[i] == State.Yellow && word[i] == entry.Guess[i])
+                {
+                    return false;
+                }
+            }
+
             if (entry.States[i] == State.Green)
             {
                 if (entry.Guess[i] == word[i])
@@ -93,6 +101,7 @@ public class Judge
                     {
                         match[j] = true;
                         found = true;
+                        break;
                     }
                 }
                 if (!found)
@@ -102,15 +111,18 @@ public class Judge
             }
         }
 
-        for (int i = 0; i < 5; ++i)
+        if (grayCheck || asAnswer)
         {
-            if (entry.States[i] == State.Gray)
+            for (int i = 0; i < 5; ++i)
             {
-                for (int j = 0; j < 5; ++j)
+                if (entry.States[i] == State.Gray)
                 {
-                    if (entry.Guess[i] == word[j] && !match[j])
+                    for (int j = 0; j < 5; ++j)
                     {
-                        return false;
+                        if (entry.Guess[i] == word[j] && !match[j])
+                        {
+                            return false;
+                        }
                     }
                 }
             }
@@ -132,15 +144,15 @@ public class Judge
         return entry.States.All(x => x == State.Green);
     }
 
-    public bool EqualState(State[] states, State[] res)
-    {
-        for (int i=0; i<5; ++i)
-        {
-            if (states[i] != res[i])
-                return false;
-        }
-        return true;
-    }
+    //public bool EqualState(State[] states, State[] res)
+    //{
+    //    for (int i=0; i<5; ++i)
+    //    {
+    //        if (states[i] != res[i])
+    //            return false;
+    //    }
+    //    return true;
+    //}
 
     internal bool FulfillAsAnswer(List<Entry> entries, string word)
     {
@@ -156,83 +168,12 @@ public class Judge
             {
                 return false;
             }
-
-            //var state = Check(word, entry.Guess);
-            //for (int i = 0; i < 5; ++i)
-            //{
-            //    if (state[i] != entry.States[i])
-            //        throw new InvalidOperationException();
-            //}
         }
         return true;
     }
 
     public bool FulfillAsAnswer(Entry entry, string word)
     {
-        var match = new bool[5];
-
-        for (int i = 0; i < 5; ++i)
-        {
-            //if (entry.States[i] == State.Gray && word.Contains(entry.Guess[i]))
-            //{
-            //    return false;
-            //}
-
-            if (entry.States[i] == State.Yellow && word[i] == entry.Guess[i])
-            {
-                return false;
-            }
-
-            if (entry.States[i] == State.Green)
-            {
-                if (entry.Guess[i] == word[i])
-                {
-                    match[i] = true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        for (int i = 0; i < 5; ++i)
-        {
-            if (entry.States[i] == State.Yellow)
-            {
-                bool found = false;
-                for (int j = 0; j < 5; ++j)
-                {
-                    if (entry.Guess[i] == word[j] && !match[j])
-                    {
-                        if (i == j)
-                            throw new InvalidOperationException();
-
-                        match[j] = true;
-                        found = true;
-                    }
-                }
-                if (!found)
-                {
-                    return false;
-                }
-            }
-        }
-
-        for (int i = 0; i < 5; ++i)
-        {
-            if (entry.States[i] == State.Gray)
-            {
-                for (int j = 0; j < 5; ++j)
-                {
-                    if (entry.Guess[i] == word[j] && !match[j])
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
+        return Fulfill(entry, word, true, true);
     }
 }
