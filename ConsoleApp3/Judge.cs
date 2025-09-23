@@ -53,13 +53,6 @@ public class Judge
             {
                 return false;
             }
-
-            //var state = Check(word, entry.Guess);
-            //for (int i = 0; i < 5; ++i)
-            //{
-            //    if (state[i] != entry.States[i])
-            //        throw new InvalidOperationException();
-            //}
         }
         return true;
     }
@@ -71,7 +64,7 @@ public class Judge
         {
             if (asAnswer)
             {
-                if (entry.States[i] == State.Yellow && word[i] == entry.Guess[i])
+                if (entry.States[i] != State.Green && word[i] == entry.Guess[i])
                 {
                     return false;
                 }
@@ -144,16 +137,6 @@ public class Judge
         return entry.States.All(x => x == State.Green);
     }
 
-    //public bool EqualState(State[] states, State[] res)
-    //{
-    //    for (int i=0; i<5; ++i)
-    //    {
-    //        if (states[i] != res[i])
-    //            return false;
-    //    }
-    //    return true;
-    //}
-
     internal bool FulfillAsAnswer(List<Entry> entries, string word)
     {
         foreach (var entry in entries)
@@ -175,5 +158,42 @@ public class Judge
     public bool FulfillAsAnswer(Entry entry, string word)
     {
         return Fulfill(entry, word, true, true);
+    }
+
+    public bool IsLegitimateGuess(Entry entry, string guess)
+    {
+        bool[] match = new bool[5];
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Green)
+            {
+                if (entry.Guess[i] != guess[i])
+                    return false;
+
+                match[i] = true;
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (entry.States[i] == State.Yellow)
+            {
+                bool found = false;
+                for (int j = 0; j < 5; ++j)
+                {
+                    if (!match[j] && entry.Guess[i] == guess[j])
+                    {
+                        match[j] = true;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                    return false;
+            }
+        }
+
+        return true;
     }
 }

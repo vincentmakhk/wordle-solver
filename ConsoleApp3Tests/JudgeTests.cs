@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace ConsoleApp3.Tests;
 
@@ -69,6 +70,7 @@ public class JudgeTests
     }
 
     [TestMethod]
+    [DataRow("blank", "baals", State.Green, State.Yellow, State.Gray, State.Yellow, State.Gray, false)]
     [DataRow("plaza", "aapas", State.Yellow, State.Yellow, State.Yellow, State.Gray, State.Gray, true)]
     [DataRow("after", "aapas", State.Green, State.Gray, State.Gray, State.Gray, State.Gray, true)]
     [DataRow("aater", "aapas", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, false)]
@@ -92,6 +94,36 @@ public class JudgeTests
         var entry = new Entry(guess, new State[] { s1, s2, s3, s4, s5 });
         var judge = new Judge();
         var actual = judge.FulfillAsAnswer(entry, word);
+        Assert.AreEqual(valid, actual);
+    }
+
+    [TestMethod]
+    [DataRow("plate", "plate", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true, DisplayName = "same")]
+    [DataRow("olate", "plate", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, false, DisplayName = "missing green")]
+    [DataRow("prate", "plate", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, false, DisplayName = "missing yellow")]
+    [DataRow("prale", "plate", State.Green, State.Yellow, State.Gray, State.Gray, State.Gray, true, DisplayName = "yellow changed")]
+
+    [DataRow("blala", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Gray, true, DisplayName = "same")]
+    [DataRow("blela", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Gray, false, DisplayName = "missing green")]
+    [DataRow("beala", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Gray, true, DisplayName = "yellow changed")]
+    
+    [DataRow("blala", "blala", State.Gray, State.Yellow, State.Green, State.Yellow, State.Gray, true, DisplayName = "same, two yellow")]
+    [DataRow("blaak", "blala", State.Gray, State.Yellow, State.Green, State.Yellow, State.Gray, false, DisplayName = "missing one green")]
+    [DataRow("blall", "blala", State.Gray, State.Yellow, State.Green, State.Yellow, State.Gray, true, DisplayName = "more than two greens")]
+    
+    [DataRow("blala", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Yellow, true, DisplayName = "same")]
+    [DataRow("balaa", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Yellow, false, DisplayName = "missing green")]
+    [DataRow("blall", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Yellow, false, DisplayName = "missing yellow")]
+    [DataRow("bnaal", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Yellow, true, DisplayName = "yellow changed")]
+    [DataRow("baaal", "blala", State.Gray, State.Yellow, State.Green, State.Gray, State.Yellow, true, DisplayName = "yellow changed")]
+
+    [DataRow("blank", "baals", State.Green, State.Yellow, State.Gray, State.Yellow, State.Gray, true, DisplayName = "yellow changed")]
+    [DataRow("plaza", "aapas", State.Yellow, State.Yellow, State.Yellow, State.Gray, State.Gray, true)]
+    public void IsLegitimateGuessTest(string word, string guess, State s1, State s2, State s3, State s4, State s5, bool valid)
+    {
+        var entry = new Entry(guess, new State[] { s1, s2, s3, s4, s5 });
+        var judge = new Judge();
+        var actual = judge.IsLegitimateGuess(entry, word);
         Assert.AreEqual(valid, actual);
     }
 }

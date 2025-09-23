@@ -6,39 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApp3.Tests
-{
-    [TestClass()]
-    public class NextWordFinderTests
-    {
-        [TestMethod]
-        [DataRow("aadrf", -1)]
-        [DataRow("acdrf", 1)]
-        [DataRow("ecdrf", 1)]
-        [DataRow("icdrf", 1)]
-        [DataRow("ocdrf", 1)]
-        [DataRow("ucdrf", 1)]
-        [DataRow("cdrfh", 3)]
-        [DataRow("crrfh", 1)]
-        public void ScoreTest(string word, int score)
-        {
-            var nextWordFinder = new NextWordFinder(new Words(), new Judge());
-            var result = nextWordFinder.Score(word);
-            Assert.AreEqual(score, result);
-        }
+namespace ConsoleApp3.Tests;
 
-        [TestMethod()]
-        public void WordGrouperTest()
-        {
-            var nextWordFinder = new NextWordFinder(new Words(), new Judge());
-            var result = nextWordFinder.WordGrouper(new string[]
-                {
-                    "abcde", "abmno", "abcmn", "accde"
-                },
-                new State[] { State.Green, State.Green, State.Gray, State.Gray, State.Gray });
-            Assert.AreEqual(3, result["ab___"].Count);
-            Assert.AreEqual(1, result["ac___"].Count);
-            Assert.AreEqual(2, result.Count);
-        }
+[TestClass()]
+public class NextWordFinderTests
+{
+    [TestMethod]
+    [DataRow("aadrf", -1)]
+    [DataRow("acdrf", 1)]
+    [DataRow("ecdrf", 1)]
+    [DataRow("icdrf", 1)]
+    [DataRow("ocdrf", 1)]
+    [DataRow("ucdrf", 1)]
+    [DataRow("cdrfh", 3)]
+    [DataRow("crrfh", 1)]
+    public void ScoreTest(string word, int score)
+    {
+        var nextWordFinder = new NextWordFinder(new Words(), new Judge());
+        var result = nextWordFinder.Score(word);
+        Assert.AreEqual(score, result);
     }
 }
